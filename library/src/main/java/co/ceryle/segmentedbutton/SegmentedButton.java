@@ -17,31 +17,54 @@ package co.ceryle.segmentedbutton;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
 public class SegmentedButton extends View {
 
+    public String text;
     private Context context;
+    private float mClipAmount;
+    private boolean clipLeftToRight;
+    private TextPaint mTextPaint;
+    private StaticLayout mStaticLayout, mStaticLayoutOverlay;
+    private Rect mTextBounds = new Rect();
+    private int mRadius, mBorderSize;
+    private boolean hasBorderLeft, hasBorderRight;
+    private RectF mRectF;
+    private Paint mPaint;
+
+    // private RectF rectF = new RectF();
+    private float text_X = 0.0f, text_Y = 0.0f, bitmap_X = 0.0f, bitmap_Y = 0.0f;
+    private PorterDuffColorFilter mBitmapNormalColor, mBitmapClipColor;
+    private Drawable mDrawable;
+    private int drawableTintOnSelection, textColorOnSelection, textColor, rippleColor, buttonWidth,
+            drawable, drawableTint, drawableWidth, drawableHeight, drawablePadding;
+    private boolean hasTextColorOnSelection, hasRipple, hasWidth, hasWeight, hasDrawableTintOnSelection,
+            hasDrawableWidth, hasDrawableHeight, hasDrawableTint, hasTextTypefacePath;
+    private float buttonWeight, textSize;
+    private String textTypefacePath;
+    private Typeface textTypeface;
+    /**
+     * GRAVITY
+     */
+
+    private DrawableGravity drawableGravity;
+    private boolean hasDrawable, hasText;
 
     public SegmentedButton(Context context) {
         super(context);
@@ -57,17 +80,6 @@ public class SegmentedButton extends View {
         super(context, attrs, defStyleAttr);
         init(context, attrs);
     }
-
-    private float mClipAmount;
-    private boolean clipLeftToRight;
-
-    private TextPaint mTextPaint;
-    private StaticLayout mStaticLayout, mStaticLayoutOverlay;
-    private Rect mTextBounds = new Rect();
-    private int mRadius, mBorderSize;
-    private boolean hasBorderLeft, hasBorderRight;
-
-    // private RectF rectF = new RectF();
 
     private void init(Context context, AttributeSet attrs) {
         this.context = context;
@@ -100,9 +112,6 @@ public class SegmentedButton extends View {
     void hasBorderRight(boolean hasBorderRight) {
         this.hasBorderRight = hasBorderRight;
     }
-
-    private RectF mRectF;
-    private Paint mPaint;
 
     private void initText() {
         if (!hasText)
@@ -137,7 +146,7 @@ public class SegmentedButton extends View {
         if (hasDrawableTintOnSelection)
             mBitmapClipColor = new PorterDuffColorFilter(drawableTintOnSelection, PorterDuff.Mode.SRC_IN);
     }
-    
+
     private void measureTextWidth(int width) {
         if (!hasText)
             return;
@@ -237,8 +246,6 @@ public class SegmentedButton extends View {
         setMeasuredDimension(width, height);
     }
 
-    private float text_X = 0.0f, text_Y = 0.0f, bitmap_X = 0.0f, bitmap_Y = 0.0f;
-
     private void calculate(int width, int height) {
         float textHeight = 0, textWidth = 0, textBoundsWidth = 0;
         if (hasText) {
@@ -318,10 +325,6 @@ public class SegmentedButton extends View {
         }
     }
 
-    private PorterDuffColorFilter mBitmapNormalColor, mBitmapClipColor;
-
-    private Drawable mDrawable;
-
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -389,9 +392,9 @@ public class SegmentedButton extends View {
         canvas.restore();
     }
 
-    private void drawDrawableWithColorFilter(Canvas canvas, ColorFilter colorFilter){
-        int drawableX = (int)bitmap_X;
-        int drawableY = (int)bitmap_Y;
+    private void drawDrawableWithColorFilter(Canvas canvas, ColorFilter colorFilter) {
+        int drawableX = (int) bitmap_X;
+        int drawableY = (int) bitmap_Y;
         int drawableWidth = mDrawable.getIntrinsicWidth();
         if (hasDrawableWidth) {
             drawableWidth = this.drawableWidth;
@@ -416,14 +419,6 @@ public class SegmentedButton extends View {
         mClipAmount = clip;
         invalidate();
     }
-
-    private int drawableTintOnSelection, textColorOnSelection, textColor, rippleColor, buttonWidth,
-            drawable, drawableTint, drawableWidth, drawableHeight, drawablePadding;
-    private boolean hasTextColorOnSelection, hasRipple, hasWidth, hasWeight, hasDrawableTintOnSelection,
-            hasDrawableWidth, hasDrawableHeight, hasDrawableTint, hasTextTypefacePath;
-    private float buttonWeight, textSize;
-    private String textTypefacePath, text;
-    private Typeface textTypeface;
 
     private void getAttributes(AttributeSet attrs) {
         TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.SegmentedButton);
@@ -512,43 +507,6 @@ public class SegmentedButton extends View {
     }
 
     /**
-     * GRAVITY
-     */
-
-    private DrawableGravity drawableGravity;
-
-    public enum DrawableGravity {
-        LEFT(0),
-        TOP(1),
-        RIGHT(2),
-        BOTTOM(3);
-
-        private int intValue;
-
-        DrawableGravity(int intValue) {
-            this.intValue = intValue;
-        }
-
-        private int getIntValue() {
-            return intValue;
-        }
-
-        public static DrawableGravity getById(int id) {
-            for (DrawableGravity e : values()) {
-                if (e.intValue == id) return e;
-            }
-            return null;
-        }
-
-        public boolean isHorizontal() {
-            return intValue == 0 || intValue == 2;
-        }
-    }
-
-    private boolean hasDrawable, hasText;
-
-
-    /**
      * Sets button's drawable by given drawable object and its position
      *
      * @param resId is your drawable's resource id
@@ -562,7 +520,7 @@ public class SegmentedButton extends View {
      *
      * @param drawable is your drawable object
      */
-    public void setDrawable(Drawable drawable){
+    public void setDrawable(Drawable drawable) {
         mDrawable = drawable;
         hasDrawable = true;
         requestLayout();
@@ -595,15 +553,6 @@ public class SegmentedButton extends View {
 
     public void removeTextColorOnSelection() {
         hasTextColorOnSelection = false;
-    }
-
-    /**
-     * If button has any drawable, it sets drawable's tint color without changing drawable's position.
-     *
-     * @param color is used to set drawable's tint color
-     */
-    public void setDrawableTint(int color) {
-        drawableTint = color;
     }
 
     /**
@@ -649,6 +598,15 @@ public class SegmentedButton extends View {
     }
 
     /**
+     * If button has any drawable, it sets drawable's tint color without changing drawable's position.
+     *
+     * @param color is used to set drawable's tint color
+     */
+    public void setDrawableTint(int color) {
+        drawableTint = color;
+    }
+
+    /**
      * @return true if button's drawable is not empty
      */
     public boolean hasDrawableTint() {
@@ -683,5 +641,33 @@ public class SegmentedButton extends View {
 
     boolean hasTextColorOnSelection() {
         return hasTextColorOnSelection;
+    }
+
+    public enum DrawableGravity {
+        LEFT(0),
+        TOP(1),
+        RIGHT(2),
+        BOTTOM(3);
+
+        private int intValue;
+
+        DrawableGravity(int intValue) {
+            this.intValue = intValue;
+        }
+
+        public static DrawableGravity getById(int id) {
+            for (DrawableGravity e : values()) {
+                if (e.intValue == id) return e;
+            }
+            return null;
+        }
+
+        private int getIntValue() {
+            return intValue;
+        }
+
+        public boolean isHorizontal() {
+            return intValue == 0 || intValue == 2;
+        }
     }
 }

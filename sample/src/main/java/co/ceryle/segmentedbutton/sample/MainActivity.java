@@ -14,6 +14,7 @@ import co.ceryle.segmentedbutton.sample.drawable.BadgeDrawable;
 public class MainActivity extends AppCompatActivity {
 
     private Button button;
+    private SegmentedButton btn_1;
     private SegmentedButtonGroup group;
 
     @Override
@@ -23,7 +24,8 @@ public class MainActivity extends AppCompatActivity {
 
         group = (SegmentedButtonGroup) findViewById(R.id.segmentedButtonGroup);
         button = (Button) findViewById(R.id.button);
-
+        btn_1 = (SegmentedButton) findViewById(R.id.btn_1);
+        btn_1.text = "naber pampa";
         updateButton(group.getPosition());
 
         group.setOnClickedButtonListener(new SegmentedButtonGroup.OnClickedButtonListener() {

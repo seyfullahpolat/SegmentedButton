@@ -46,6 +46,7 @@
             app:sbg_selectorColor="@color/grey_500">
 
             <co.ceryle.segmentedbutton.SegmentedButton
+                android:id="@+id/btn_1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
